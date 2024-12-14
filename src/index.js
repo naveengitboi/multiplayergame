@@ -1,34 +1,41 @@
 const express = require("express");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
+
+//cors for cross origin
 const cors = require("cors");
-const tmx = require('tmx-parser');
+
+//tmx parser for map.tmx file
+const tmx = require("tmx-parser");
 
 
+//init
 const app = express();
 app.use(cors());
 
 const httpServer = createServer(app);
 
-
-
 const io = new Server(httpServer, {
-    cors: {
-        origin: "http://localhost:3000",
-    },
+  cors: {
+    origin: "http://localhost:3000",
+  },
 });
 
-io.on("connect", (socket) => {
+
+//loading map
+const loadMap = require('./mapLoader');
+
+async function main() {
+  const map2D = await loadMap();
+  io.on("connect", (socket) => {
     console.log(socket.id);
-});
+    socket.emit("map", map2D);
+  });
+  app.use(express.static("public"));
 
-tmx.parseFile("./src/map.tmx", function(err, map){
-    if(err) throw err;
-    console.log(map);
-});
-
-app.use(express.static("public"));
-
-httpServer.listen(3000, () => {
+  httpServer.listen(3000, () => {
     console.log("Server running");
-});
+  });
+}
+
+main();
