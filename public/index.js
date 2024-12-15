@@ -19,7 +19,6 @@ let map = [[]];
 const TILE_SIZE = 16;
 const TILES_IN_ROW = 8;
 
-
 socket.on("map", (loadedMap) => {
   map = loadedMap;
 });
@@ -27,51 +26,50 @@ socket.on("map", (loadedMap) => {
 let players = [];
 socket.on("players", (serverPlayers) => {
   players = serverPlayers;
-})
+});
 
 function resizeWindow() {
   canvasEle.width = window.innerWidth;
   canvasEle.height = window.innerHeight;
 }
 
-
 //movemnets
 
 const inputs = {
-  "up":false,
-  "down": false,
-  "right":false,
-  "left": false,
-}
+  up: false,
+  down: false,
+  right: false,
+  left: false,
+};
 
 window.addEventListener("keydown", (e) => {
-  let press = e.key
+  let press = e.key;
   console.log(press);
-  if(press == "w"){
+  if (press == "w") {
     inputs["up"] = true;
-  }else if(press == "d"){
+  } else if (press == "d") {
     inputs["right"] = true;
-  }else if(press == "s"){
+  } else if (press == "s") {
     inputs["down"] = true;
-  }else if(press == "a"){
+  } else if (press == "a") {
     inputs["left"] = true;
   }
   socket.emit("inputs", inputs);
-})
+});
 
 window.addEventListener("keyup", (e) => {
   const press = e.key.toLowerCase();
-  if(press == "w"){
+  if (press == "w") {
     inputs["up"] = false;
-  }else if(press == "d"){
+  } else if (press == "d") {
     inputs["right"] = false;
-  }else if(press == "s"){
+  } else if (press == "s") {
     inputs["down"] = false;
-  }else if(press == "a"){
+  } else if (press == "a") {
     inputs["left"] = false;
   }
   socket.emit("inputs", inputs);
-})
+});
 
 function loop() {
   window.addEventListener("resize", resizeWindow);
@@ -92,14 +90,12 @@ function loop() {
         TILE_SIZE,
         TILE_SIZE,
       );
-
     }
   }
 
-  for(const eachPlayer of players){
-      ctx.drawImage(santaImage,eachPlayer.x,eachPlayer.y);
+  for (const eachPlayer of players) {
+    ctx.drawImage(santaImage, eachPlayer.x, eachPlayer.y);
   }
-
 
   window.requestAnimationFrame(loop);
 }

@@ -23,29 +23,26 @@ const io = new Server(httpServer, {
 //loading map
 const loadMap = require("./mapLoader");
 
-
-const inputsMap = {}
+const inputsMap = {};
 let players = [];
 const TICK_RATE = 30;
 const SPEED = 5;
 
-function tick(){
-  for(const player of players){
+function tick() {
+  for (const player of players) {
     const inputs = inputsMap[player.id];
-    if(inputs.up){
+    if (inputs.up) {
       player.y -= SPEED;
-    }else if(inputs.down){
+    } else if (inputs.down) {
       player.y += SPEED;
     }
 
-    if(inputs.right){
+    if (inputs.right) {
       player.x += SPEED;
-    }else if(inputs.left){
+    } else if (inputs.left) {
       player.x -= SPEED;
     }
-
   }
-
 
   io.emit("players", players);
 }
@@ -57,23 +54,23 @@ async function main() {
     socket.emit("map", map2D);
 
     inputsMap[socket.id] = {
-    "up":false,
-    "down": false,
-    "right":false,
-    "left": false,
-    }
+      up: false,
+      down: false,
+      right: false,
+      left: false,
+    };
     players.push({
       id: socket.id,
       x: 0,
-      y:0
-    })
+      y: 0,
+    });
     socket.on("inputs", (inputs) => {
-      inputsMap[socket.id] = inputs
-    })
+      inputsMap[socket.id] = inputs;
+    });
 
     socket.on("disconnect", () => {
-      players = players.filter((player)  => player.id != socket.id);
-    })
+      players = players.filter((player) => player.id != socket.id);
+    });
   });
   app.use(express.static("public"));
 
@@ -81,7 +78,7 @@ async function main() {
     console.log("Server running");
   });
 
-  setInterval(tick, 1000/TICK_RATE);
+  setInterval(tick, 1000 / TICK_RATE);
 }
 
 main();
