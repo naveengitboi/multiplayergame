@@ -25,7 +25,7 @@ const loadMap = require("./mapLoader");
 
 
 const inputsMap = {}
-const players = [];
+let players = [];
 const TICK_RATE = 30;
 const SPEED = 5;
 
@@ -69,6 +69,10 @@ async function main() {
     })
     socket.on("inputs", (inputs) => {
       inputsMap[socket.id] = inputs
+    })
+
+    socket.on("disconnect", () => {
+      players = players.filter((player)  => player.id != socket.id);
     })
   });
   app.use(express.static("public"));
