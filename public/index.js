@@ -16,6 +16,8 @@ socket.on("connect", (response) => {
 });
 
 let map = [[]];
+let groundMap = [[]];
+let decalsMap = [[]];
 const TILE_SIZE = 16;
 const TILES_IN_ROW = 8;
 let players = [];
@@ -23,7 +25,10 @@ let snowballs = [];
 const SNOWBALL_RADIUS = 3;
 
 socket.on("map", (loadedMap) => {
-  map = loadedMap;
+  console.log(loadedMap)
+  groundMap = loadedMap.ground;
+  decalsMap = loadedMap.decals;
+  console.log("decals map", decalsMap);
 });
 
 socket.on("players", (serverPlayers) => {
@@ -49,8 +54,7 @@ const inputs = {
 };
 
 window.addEventListener("keydown", (e) => {
-  let press = e.key;
-  console.log(press);
+  let press = e.key.toLowerCase();
   if (press == "w") {
     inputs["up"] = true;
   } else if (press == "d") {
@@ -100,9 +104,9 @@ function loop() {
     cameraX = parseInt(myPlayer.x - canvasEle.width / 2);
     cameraY = parseInt(myPlayer.y - canvasEle.height / 2);
   }
-  for (let row = 0; row < map.length; row++) {
-    for (let col = 0; col < map[0].length; col++) {
-      const { id } = map[row][col];
+  for (let row = 0; row < groundMap.length; row++) {
+    for (let col = 0; col < groundMap[0].length; col++) {
+      const { id } = groundMap[row][col];
       const imageRow = parseInt(id / TILES_IN_ROW);
       const imageCol = parseInt(id % TILES_IN_ROW);
       ctx.drawImage(
@@ -118,6 +122,27 @@ function loop() {
       );
     }
   }
+
+  for (let row = 0; row < decalsMap.length; row++) {
+    for (let col = 0; col < decalsMap[0].length; col++) {
+      const { id } = decalsMap[row][col] ?? {id : undefined};
+      const imageRow = parseInt(id / TILES_IN_ROW);
+      const imageCol = parseInt(id % TILES_IN_ROW);
+      ctx.drawImage(
+        mapImage,
+        imageCol * TILE_SIZE,
+        imageRow * TILE_SIZE,
+        TILE_SIZE,
+        TILE_SIZE,
+        col * TILE_SIZE - cameraX,
+        row * TILE_SIZE - cameraY,
+        TILE_SIZE,
+        TILE_SIZE,
+      );
+    }
+  }
+
+
   //players movement
   for (const eachPlayer of players) {
     ctx.drawImage(santaImage, eachPlayer.x - cameraX, eachPlayer.y - cameraY);

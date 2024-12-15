@@ -29,6 +29,7 @@ let snowballs = [];
 const TICK_RATE = 30;
 const SPEED = 5;
 const SNOWBALL_SPEED = 8;
+const PLAYER_SIZE = 32;
 
 function tick(delta) {
   for (const player of players) {
@@ -53,8 +54,8 @@ function tick(delta) {
 
     for(const player of players){
       if(player.id == snowball.playerId) continue;
-      let  distance = Math.sqrt((player.x + 8 -snowball.x)**2 + (player.y + 8 - snowball.y)**2);
-      if(distance <= 8){
+      let  distance = Math.sqrt((player.x + PLAYER_SIZE/2 -snowball.x)**2 + (player.y + PLAYER_SIZE/2 - snowball.y)**2);
+      if(distance <= PLAYER_SIZE/2){
         player.x = 0;
         player.y = 0;
         snowball.timeLeft = -1;
@@ -69,10 +70,13 @@ function tick(delta) {
 }
 
 async function main() {
-  const map2D = await loadMap();
+  const {ground2D, decals2D} = await loadMap();
   io.on("connect", (socket) => {
     console.log(socket.id);
-    socket.emit("map", map2D);
+    socket.emit("map", {
+      ground: ground2D,
+      decals: decals2D
+    });
 
     inputsMap[socket.id] = {
       up: false,
