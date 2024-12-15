@@ -1,6 +1,5 @@
 const mapImage = new Image();
-mapImage.src = "../src/snowy-sheet.png";
-
+mapImage.src = "/snowy-sheet.png";
 
 const canvasEle = document.getElementById("canvas");
 
@@ -21,7 +20,13 @@ socket.on("map", (loadedMap) => {
   map = loadedMap;
 });
 
+function resizeWindow() {
+  canvasEle.width = window.innerWidth;
+  canvasEle.height = window.innerHeight;
+}
+
 function loop() {
+  window.addEventListener("resize", resizeWindow);
   ctx.clearRect(0, 0, canvasEle.width, canvasEle.height);
   for (let row = 0; row < map.length; row++) {
     for (let col = 0; col < map[0].length; col++) {
@@ -41,7 +46,6 @@ function loop() {
       );
     }
   }
-  ctx.fillRect(0, 0, canvasEle.width, canvasEle.height);
   window.requestAnimationFrame(loop);
 }
 

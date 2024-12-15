@@ -8,7 +8,6 @@ const cors = require("cors");
 //tmx parser for map.tmx file
 const tmx = require("tmx-parser");
 
-
 //init
 const app = express();
 app.use(cors());
@@ -21,9 +20,8 @@ const io = new Server(httpServer, {
   },
 });
 
-
 //loading map
-const loadMap = require('./mapLoader');
+const loadMap = require("./mapLoader");
 
 async function main() {
   const map2D = await loadMap();
