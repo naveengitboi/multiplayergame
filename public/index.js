@@ -74,6 +74,15 @@ window.addEventListener("keyup", (e) => {
 function loop() {
   window.addEventListener("resize", resizeWindow);
   ctx.clearRect(0, 0, canvasEle.width, canvasEle.height);
+
+  const myPlayer = players.find((player) => player.id === socket.id);
+
+  let cameraX = 0;
+  let cameraY = 0;
+  if (myPlayer) {
+    cameraX = parseInt(myPlayer.x - canvasEle.width / 2);
+    cameraY = parseInt(myPlayer.y - canvasEle.height / 2);
+  }
   for (let row = 0; row < map.length; row++) {
     for (let col = 0; col < map[0].length; col++) {
       const { id } = map[row][col];
@@ -85,8 +94,8 @@ function loop() {
         imageRow * TILE_SIZE,
         TILE_SIZE,
         TILE_SIZE,
-        col * TILE_SIZE,
-        row * TILE_SIZE,
+        col * TILE_SIZE - cameraX,
+        row * TILE_SIZE - cameraY,
         TILE_SIZE,
         TILE_SIZE,
       );
@@ -94,7 +103,7 @@ function loop() {
   }
 
   for (const eachPlayer of players) {
-    ctx.drawImage(santaImage, eachPlayer.x, eachPlayer.y);
+    ctx.drawImage(santaImage, eachPlayer.x - cameraX, eachPlayer.y - cameraY);
   }
 
   window.requestAnimationFrame(loop);
