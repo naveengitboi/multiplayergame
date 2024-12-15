@@ -28,22 +28,66 @@ let players = [];
 let snowballs = [];
 const TICK_RATE = 30;
 const SPEED = 5;
+const TILE_SIZE = 32;
 const SNOWBALL_SPEED = 8;
 const PLAYER_SIZE = 32;
+let ground2D, decals2D;
+
+function isCollided(rect1, rect2){
+  return (rect1.x < rect2.x + rect2.w &&
+          rect1.x + rect1.w > rect2.x &&
+          rect1.y < rect2.y + rect2.h && 
+          rect1.h + rect1.y > rect2.y)
+}
+
+function isCollidingMap(player) {
+  for (let row = 0; row < decals2D.length; row++) {
+    for (let col = 0; col < decals2D[0].length; col++) {
+      let tile = decals2D[row][col];
+      if(tile && isCollided(
+        {
+          x:player.x,
+          y: player.y,
+          w: TILE_SIZE,
+          h: TILE_SIZE
+        },
+        {
+          x:col*TILE_SIZE,
+          y:row*TILE_SIZE,
+          w: TILE_SIZE,
+          h: TILE_SIZE
+        }
+      )){
+        return true;
+      }
+      
+    }
+  }
+  return false;
+}
 
 function tick(delta) {
   for (const player of players) {
     const inputs = inputsMap[player.id];
+    let previousX = player.x;
+    let previousY = player.y;
     if (inputs.up) {
       player.y -= SPEED;
     } else if (inputs.down) {
       player.y += SPEED;
+    }
+    if(isCollidingMap(player)){
+      player.y = previousY;
     }
 
     if (inputs.right) {
       player.x += SPEED;
     } else if (inputs.left) {
       player.x -= SPEED;
+    }
+
+    if(isCollidingMap(player)){
+      player.x = previousX;
     }
   }
 
@@ -52,10 +96,13 @@ function tick(delta) {
     snowball.y += Math.sin(snowball.angle) * SNOWBALL_SPEED;
     snowball.timeLeft -= delta;
 
-    for(const player of players){
-      if(player.id == snowball.playerId) continue;
-      let  distance = Math.sqrt((player.x + PLAYER_SIZE/2 -snowball.x)**2 + (player.y + PLAYER_SIZE/2 - snowball.y)**2);
-      if(distance <= PLAYER_SIZE/2){
+    for (const player of players) {
+      if (player.id == snowball.playerId) continue;
+      let distance = Math.sqrt(
+        (player.x + PLAYER_SIZE / 2 - snowball.x) ** 2 +
+        (player.y + PLAYER_SIZE / 2 - snowball.y) ** 2,
+      );
+      if (distance <= PLAYER_SIZE / 2) {
         player.x = 0;
         player.y = 0;
         snowball.timeLeft = -1;
@@ -70,12 +117,12 @@ function tick(delta) {
 }
 
 async function main() {
-  const {ground2D, decals2D} = await loadMap();
+  ({ ground2D, decals2D } = await loadMap());
   io.on("connect", (socket) => {
     console.log(socket.id);
     socket.emit("map", {
       ground: ground2D,
-      decals: decals2D
+      decals: decals2D,
     });
 
     inputsMap[socket.id] = {
@@ -100,7 +147,7 @@ async function main() {
         x: player.x,
         y: player.y,
         timeLeft: 1000,
-        playerId: socket.id
+        playerId: socket.id,
       });
     });
 
