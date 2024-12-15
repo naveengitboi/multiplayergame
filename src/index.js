@@ -33,34 +33,38 @@ const SNOWBALL_SPEED = 8;
 const PLAYER_SIZE = 32;
 let ground2D, decals2D;
 
-function isCollided(rect1, rect2){
-  return (rect1.x < rect2.x + rect2.w &&
-          rect1.x + rect1.w > rect2.x &&
-          rect1.y < rect2.y + rect2.h && 
-          rect1.h + rect1.y > rect2.y)
+function isCollided(rect1, rect2) {
+  return (
+    rect1.x < rect2.x + rect2.w &&
+    rect1.x + rect1.w > rect2.x &&
+    rect1.y < rect2.y + rect2.h &&
+    rect1.h + rect1.y > rect2.y
+  );
 }
 
 function isCollidingMap(player) {
   for (let row = 0; row < decals2D.length; row++) {
     for (let col = 0; col < decals2D[0].length; col++) {
       let tile = decals2D[row][col];
-      if(tile && isCollided(
-        {
-          x:player.x,
-          y: player.y,
-          w: TILE_SIZE,
-          h: TILE_SIZE
-        },
-        {
-          x:col*TILE_SIZE,
-          y:row*TILE_SIZE,
-          w: TILE_SIZE,
-          h: TILE_SIZE
-        }
-      )){
+      if (
+        tile &&
+        isCollided(
+          {
+            x: player.x,
+            y: player.y,
+            w: TILE_SIZE,
+            h: TILE_SIZE,
+          },
+          {
+            x: col * TILE_SIZE,
+            y: row * TILE_SIZE,
+            w: TILE_SIZE,
+            h: TILE_SIZE,
+          },
+        )
+      ) {
         return true;
       }
-      
     }
   }
   return false;
@@ -76,7 +80,7 @@ function tick(delta) {
     } else if (inputs.down) {
       player.y += SPEED;
     }
-    if(isCollidingMap(player)){
+    if (isCollidingMap(player)) {
       player.y = previousY;
     }
 
@@ -86,7 +90,7 @@ function tick(delta) {
       player.x -= SPEED;
     }
 
-    if(isCollidingMap(player)){
+    if (isCollidingMap(player)) {
       player.x = previousX;
     }
   }
@@ -133,8 +137,8 @@ async function main() {
     };
     players.push({
       id: socket.id,
-      x: 0,
-      y: 0,
+      x: 400,
+      y: 300,
     });
     socket.on("inputs", (inputs) => {
       inputsMap[socket.id] = inputs;
