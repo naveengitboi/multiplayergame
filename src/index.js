@@ -25,10 +25,12 @@ const loadMap = require("./mapLoader");
 
 const inputsMap = {};
 let players = [];
+let snowballs = [];
 const TICK_RATE = 30;
 const SPEED = 5;
+const SNOWBALL_SPEED = 8;
 
-function tick() {
+function tick(delta) {
   for (const player of players) {
     const inputs = inputsMap[player.id];
     if (inputs.up) {
@@ -44,7 +46,26 @@ function tick() {
     }
   }
 
+  for (const snowball of snowballs) {
+    snowball.x += Math.cos(snowball.angle) * SNOWBALL_SPEED;
+    snowball.y += Math.sin(snowball.angle) * SNOWBALL_SPEED;
+    snowball.timeLeft -= delta;
+
+    for(const player of players){
+      if(player.id == snowball.playerId) continue;
+      let  distance = Math.sqrt((player.x + 8 -snowball.x)**2 + (player.y + 8 - snowball.y)**2);
+      if(distance <= 8){
+        player.x = 0;
+        player.y = 0;
+        snowball.timeLeft = -1;
+        break;
+      }
+    }
+  }
+  snowballs = snowballs.filter((snowball) => snowball.timeLeft > 0);
+
   io.emit("players", players);
+  io.emit("snowballs", snowballs);
 }
 
 async function main() {
@@ -68,6 +89,17 @@ async function main() {
       inputsMap[socket.id] = inputs;
     });
 
+    socket.on("snowballAngle", (angle) => {
+      const player = players.find((player) => player.id === socket.id);
+      snowballs.push({
+        angle,
+        x: player.x,
+        y: player.y,
+        timeLeft: 1000,
+        playerId: socket.id
+      });
+    });
+
     socket.on("disconnect", () => {
       players = players.filter((player) => player.id != socket.id);
     });
@@ -77,8 +109,14 @@ async function main() {
   httpServer.listen(3000, () => {
     console.log("Server running");
   });
+  let lastUpdated = Date.now();
+  setInterval(() => {
+    let now = Date.now();
+    let delta = now - lastUpdated;
+    lastUpdated = now;
 
-  setInterval(tick, 1000 / TICK_RATE);
+    tick(delta);
+  }, 1000 / TICK_RATE);
 }
 
 main();

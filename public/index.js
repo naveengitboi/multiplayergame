@@ -18,14 +18,20 @@ socket.on("connect", (response) => {
 let map = [[]];
 const TILE_SIZE = 16;
 const TILES_IN_ROW = 8;
+let players = [];
+let snowballs = [];
+const SNOWBALL_RADIUS = 3;
 
 socket.on("map", (loadedMap) => {
   map = loadedMap;
 });
 
-let players = [];
 socket.on("players", (serverPlayers) => {
   players = serverPlayers;
+});
+
+socket.on("snowballs", (serverSnowballs) => {
+  snowballs = serverSnowballs;
 });
 
 function resizeWindow() {
@@ -71,6 +77,17 @@ window.addEventListener("keyup", (e) => {
   socket.emit("inputs", inputs);
 });
 
+window.addEventListener("click", (e) => {
+  let clickX = e.clientX;
+  let clickY = e.clientY;
+  let angle = Math.atan2(
+    clickY - canvasEle.height / 2,
+    clickX - canvasEle.width / 2,
+  );
+
+  socket.emit("snowballAngle", angle);
+});
+
 function loop() {
   window.addEventListener("resize", resizeWindow);
   ctx.clearRect(0, 0, canvasEle.width, canvasEle.height);
@@ -101,9 +118,22 @@ function loop() {
       );
     }
   }
-
+  //players movement
   for (const eachPlayer of players) {
     ctx.drawImage(santaImage, eachPlayer.x - cameraX, eachPlayer.y - cameraY);
+  }
+
+  for (const snowball of snowballs) {
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.arc(
+      snowball.x - cameraX,
+      snowball.y - cameraY,
+      SNOWBALL_RADIUS,
+      0,
+      2 * Math.PI,
+    );
+    ctx.fill();
   }
 
   window.requestAnimationFrame(loop);
